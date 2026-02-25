@@ -32,7 +32,21 @@ from transformers import (
     PreTrainedModel,
     PreTrainedTokenizerFast,
 )
+from modeling.mamba_modeling import MambaForSequenceClassification
 
+def load_mamba_and_tokenizer(model_id: str, device: torch.device) -> Tuple[PreTrainedModel, PreTrainedTokenizerFast]:
+    """
+    Load a sequence-classification model and its tokenizer.
+
+    If the HF repo contains custom code (and requires trust_remote_code), you can
+    add `trust_remote_code=True` to from_pretrained calls below.
+    """
+    # Use AutoTokenizer (fast) and AutoModelForSequenceClassification
+    tokenizer = AutoTokenizer.from_pretrained(model_id, use_fast=True)
+    model = MambaForSequenceClassification.from_pretrained(model_id)
+    model.to(device)
+    model.eval()
+    return model, tokenizer
 
 def load_model_and_tokenizer(model_id: str, device: torch.device) -> Tuple[PreTrainedModel, PreTrainedTokenizerFast]:
     """
@@ -141,7 +155,7 @@ def benchmark_models(
     modern_model, modern_tokenizer = load_model_and_tokenizer(modern_model_id, device)
 
     print("Loading Mamba model/tokenizer...")
-    mamba_model, mamba_tokenizer = load_model_and_tokenizer(mamba_model_id, device)
+    mamba_model, mamba_tokenizer = load_mamba_and_tokenizer(mamba_model_id, device)
 
     lengths = list(range(min_len, max_len + 1, step))
     results = {"modern": [], "mamba": []}
