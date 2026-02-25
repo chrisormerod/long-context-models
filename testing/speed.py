@@ -110,9 +110,6 @@ def single_forward_time_ms(
     # warmup
     with torch.inference_mode():
         
-        import pdb
-        pdb.set_trace()
-        
         for _ in range(warmup):
             if token_type_ids is not None:
                 _ = model(input_ids=input_ids)
@@ -215,7 +212,7 @@ def save_results_csv(results: Dict[str, List[Tuple[int, float]]], out_path: str 
 
 def parse_args():
     p = argparse.ArgumentParser(description="Benchmark ModernBERT vs Mamba sequence classification inference speed")
-    p.add_argument("--modern_model", type=str, default="bert-base-uncased", help="HF id of ModernBERT seq-class model (or substitute).")
+    p.add_argument("--modern_model", type=str, default="answerdotai/ModernBERT-base", help="HF id of ModernBERT seq-class model (or substitute).")
     p.add_argument("--mamba_model", type=str, default="state-spaces/mamba-130m-hf", help="HF id/path for Mamba seq-class model.")
     p.add_argument("--min_len", type=int, default=64)
     p.add_argument("--max_len", type=int, default=8192)
