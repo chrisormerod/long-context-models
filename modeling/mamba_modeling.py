@@ -125,7 +125,6 @@ class MambaForSequenceClassification(PreTrainedModel):
         base_outputs = self.mamba(
             input_ids=input_ids,
             attention_mask=attention_mask,
-            position_ids=position_ids,
             inputs_embeds=inputs_embeds,
             return_dict=True,
             **kwargs,
