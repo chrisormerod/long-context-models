@@ -109,6 +109,10 @@ def single_forward_time_ms(
     token_type_ids = None
     # warmup
     with torch.inference_mode():
+        
+        import pdb
+        pdb.set_trace()
+        
         for _ in range(warmup):
             if token_type_ids is not None:
                 _ = model(input_ids=input_ids, attention_mask=attention_mask, token_type_ids=token_type_ids)
