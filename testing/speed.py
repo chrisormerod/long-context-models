@@ -105,13 +105,13 @@ def single_forward_time_ms(
     input_ids = enc["input_ids"].to(device)
     attention_mask = enc["attention_mask"].to(device)
     # Some models require token_type_ids
-    token_type_ids = enc["token_type_ids"].to(device) if "token_type_ids" in enc else None
-
+    # token_type_ids = enc["token_type_ids"].to(device) if "token_type_ids" in enc else None
+    token_type_ids = None
     # warmup
     with torch.inference_mode():
         for _ in range(warmup):
             if token_type_ids is not None:
-                _ = model(input_ids=input_ids, attention_mask=attention_mask)
+                _ = model(input_ids=input_ids, attention_mask=attention_mask, token_type_ids=token_type_ids)
             else:
                 _ = model(input_ids=input_ids, attention_mask=attention_mask)
 
@@ -124,7 +124,7 @@ def single_forward_time_ms(
         for _ in range(repeats):
             t0 = time.perf_counter()
             if token_type_ids is not None:
-                _ = model(input_ids=input_ids, attention_mask=attention_mask)
+                _ = model(input_ids=input_ids, attention_mask=attention_mask, token_type_ids=token_type_ids)
             else:
                 _ = model(input_ids=input_ids, attention_mask=attention_mask)
             if device.type == "cuda":
