@@ -19,7 +19,9 @@ model = MambaForSequenceClassification.from_pretrained(model_id, num_labels=7)
 tokenizer = AutoTokenizer.from_pretrained(model_id)
 
 for L in model.mamba.layers:
-    L.mixer.dt_proj.requires_grad_(False)
+    L.mixer.A_log.requires_grad_(False)
+    L.mixer.D.requires_grad_(False)
+    
 
 trainer, train_result, eval_metrics = train(model, tokenizer, 
                                              data['train'].rename_columns({"full_text":"text","score":"label"}), 
