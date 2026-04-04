@@ -219,6 +219,7 @@ def train(
         save_total_limit=save_total_limit,
         report_to=report_to,
         fp16=fp16,
+        weight_decay=0.0,
         dataloader_num_workers=dataloader_num_workers,
     )
 
