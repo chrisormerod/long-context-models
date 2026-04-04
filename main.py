@@ -17,7 +17,7 @@ model_id = "state-spaces/mamba-130m-hf"
 
 data = get_asap(DATA_DIR)
 model = MambaForSequenceClassification.from_pretrained(model_id, num_labels=7)
-model.classifier = torch.nn.Linear(in_features = 768,out_features=7, bias=True)
+model.classifier = torch.nn.Linear(in_features = 768,out_features=7, bias=False)
 tokenizer = AutoTokenizer.from_pretrained(model_id)
 
 # for L in model.mamba.layers:
