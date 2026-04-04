@@ -46,7 +46,7 @@ def compute_metrics(eval_pred):
             "QWK":qwk,
         }
 
-    return {"accuracy": accuracy}
+    return {"accuracy": accuracy, "QWK":qwk}
 
 
 def train(
