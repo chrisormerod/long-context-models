@@ -11,6 +11,7 @@ from config import DATA_DIR, TMP_DIR
 from modeling.train_model import train
 from modeling.mamba_modeling import MambaForSequenceClassification
 from transformers import AutoTokenizer
+import torch
 
 model_id = "state-spaces/mamba-130m-hf"
 
