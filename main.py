@@ -16,6 +16,7 @@ model_id = "state-spaces/mamba-130m-hf"
 
 data = get_asap(DATA_DIR)
 model = MambaForSequenceClassification.from_pretrained(model_id, num_labels=7)
+model.classifier = torch.nn.Linear(in_features = 768,out_features=7, bias=True)
 tokenizer = AutoTokenizer.from_pretrained(model_id)
 
 # for L in model.mamba.layers:
@@ -23,8 +24,8 @@ tokenizer = AutoTokenizer.from_pretrained(model_id)
 #     L.mixer.D.requires_grad_(False)
     
 for x in model.mamba.layers: x.requires_grad_(False)
-# for x in model.backbone.layers: x.mixer.x_proj.requires_grad_(True)
-# for x in model.backbone.layers: x.mixer.dt_proj.requires_grad_(True)
+for x in model.backbone.layers: x.mixer.x_proj.requires_grad_(True)
+for x in model.backbone.layers: x.mixer.dt_proj.requires_grad_(True)
 for x in model.mamba.layers: x.mixer.in_proj.requires_grad_(True)
 for x in model.mamba.layers: x.mixer.out_proj.requires_grad_(True)
 
