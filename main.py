@@ -25,8 +25,8 @@ tokenizer = AutoTokenizer.from_pretrained(model_id)
 #     L.mixer.D.requires_grad_(False)
     
 for x in model.mamba.layers: x.requires_grad_(False)
-for x in model.backbone.layers: x.mixer.x_proj.requires_grad_(True)
-for x in model.backbone.layers: x.mixer.dt_proj.requires_grad_(True)
+for x in model.mamba.layers: x.mixer.x_proj.requires_grad_(True)
+for x in model.mamba.layers: x.mixer.dt_proj.requires_grad_(True)
 for x in model.mamba.layers: x.mixer.in_proj.requires_grad_(True)
 for x in model.mamba.layers: x.mixer.out_proj.requires_grad_(True)
 
