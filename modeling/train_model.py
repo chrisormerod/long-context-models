@@ -12,12 +12,15 @@ from transformers import (
     set_seed,
     ProgressCallback
 )
+from sklearn.metrics import cohen_kappa_score
 
 
 def compute_metrics(eval_pred):
     logits, labels = eval_pred
     preds = np.argmax(logits, axis=-1)
-
+    
+    qwk = cohen_kappa_score(labels, preds, weights="quadratic")
+    
     accuracy = (preds == labels).mean().item()
 
     # Simple binary precision/recall/F1 if applicable
@@ -40,6 +43,7 @@ def compute_metrics(eval_pred):
             "precision": precision,
             "recall": recall,
             "f1": f1,
+            "QWK":qwk,
         }
 
     return {"accuracy": accuracy}
@@ -53,20 +57,20 @@ def train(
     output_dir: str,
     text_column: str = "text",
     label_column: str = "label",
-    max_length: int = 512,
+    max_length: int = 4096,
     seed: int = 42,
-    num_train_epochs: float = 3.0,
-    learning_rate: float = 2e-5,
+    num_train_epochs: float = 4.0,
+    learning_rate: float = 5e-5,
     weight_decay: float = 0.01,
     warmup_ratio: float = 0.1,
-    per_device_train_batch_size: int = 1,
-    per_device_eval_batch_size: int = 1,
+    per_device_train_batch_size: int = 4,
+    per_device_eval_batch_size: int = 4,
     gradient_accumulation_steps: int = 1,
     logging_steps: int = 50,
     eval_strategy: str = "epoch",
     save_strategy: str = "epoch",
     save_total_limit: int = 2,
-    metric_for_best_model: str = "accuracy",
+    metric_for_best_model: str = "QWK",
     greater_is_better: bool = True,
     load_best_model_at_end: bool = True,
     report_to: str = "none",
