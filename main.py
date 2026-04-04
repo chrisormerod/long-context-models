@@ -32,4 +32,5 @@ for x in model.mamba.layers: x.mixer.out_proj.requires_grad_(True)
 trainer, train_result, eval_metrics = train(model, tokenizer, 
                                              data['train'].rename_columns({"full_text":"text","score":"label"}), 
                                              data['test'].rename_columns({"full_text":"text","score":"label"}), 
-                                             output_dir = TMP_DIR)
+                                             output_dir = TMP_DIR,
+                                             warmup_ratio = 0.0)
