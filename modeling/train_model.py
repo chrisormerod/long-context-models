@@ -61,7 +61,7 @@ def train(
     seed: int = 42,
     num_train_epochs: float = 4.0,
     learning_rate: float = 5e-5,
-    weight_decay: float = 0.01,
+    weight_decay: float = 0.0,
     warmup_ratio: float = 0.1,
     per_device_train_batch_size: int = 16,
     per_device_eval_batch_size: int = 16,
@@ -219,7 +219,6 @@ def train(
         save_total_limit=save_total_limit,
         report_to=report_to,
         fp16=fp16,
-        weight_decay=0.0,
         dataloader_num_workers=dataloader_num_workers,
     )
 
