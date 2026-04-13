@@ -58,7 +58,7 @@ class MambaForSequenceClassification(PreTrainedModel):
         # Base model: use AutoModel so HF resolves the correct Mamba implementation.
         # When constructing with `from_pretrained`, the library will call this __init__ with a config,
         # then PreTrainedModel.from_pretrained will replace the model weights appropriately.
-        self.mamba = AutoModel.from_config(config)
+        self.backbone = AutoModel.from_config(config)
 
         # Dropout: prefer config.classifier_dropout or config.hidden_dropout_prob if available
         dropout_prob = getattr(config, "classifier_dropout", None)
@@ -122,7 +122,7 @@ class MambaForSequenceClassification(PreTrainedModel):
 
         # Pass through to the base Mamba model.
         # We use `return_dict=True` for easier handling of outputs in modern HF style.
-        base_outputs = self.mamba(
+        base_outputs = self.backbone(
             input_ids=input_ids,
             attention_mask=attention_mask,
             inputs_embeds=inputs_embeds,
