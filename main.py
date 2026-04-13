@@ -35,5 +35,8 @@ trainer, train_result, eval_metrics = train(model, tokenizer,
                                              data['test'].rename_columns({"full_text":"text","score":"label"}), 
                                              output_dir = TMP_DIR,
                                              warmup_ratio = 0.0,
-                                             num_train_epochs=10,
+                                             num_train_epochs=1,
                                              per_device_train_batch_size=16)
+
+import pdb
+pdb.set_trace()
