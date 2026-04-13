@@ -24,8 +24,9 @@ trainer, train_result, eval_metrics = train(model, tokenizer,
                                              data['test'].rename_columns({"full_text":"text","score":"label"}), 
                                              output_dir = TMP_DIR,
                                              warmup_ratio = 0.0,
-                                             num_train_epochs=1,
-                                             per_device_train_batch_size=16)
+                                             num_train_epochs=4,
+                                             max_length=8196,
+                                             per_device_train_batch_size=8)
 
 @torch.no_grad
 def score(text):
@@ -34,6 +35,8 @@ def score(text):
     output = {'pred_score':int(model_output.logits.argmax(-1))}
     output.update({f"pred_logit_{i}":float(model_output.logits[0][i]) for i in range(6)})
     return output
+
+data['test'] = data['test'].map(lambda x:score(x['full_text']))
 
 import pdb
 pdb.set_trace()
