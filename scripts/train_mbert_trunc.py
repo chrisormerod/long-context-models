@@ -31,7 +31,7 @@ trainer, train_result, eval_metrics = train(model, tokenizer,
 
 @torch.no_grad
 def score(text):
-    model_input = tokenizer(text, return_tensors="pt").to(model.device)
+    model_input = tokenizer(text, return_tensors="pt", max_length=512).to(model.device)
     model_output = model(**model_input)
     output = {'pred_score':int(model_output.logits.argmax(-1))}
     output.update({f"pred_logit_{i}":float(model_output.logits[0][i]) for i in range(6)})
