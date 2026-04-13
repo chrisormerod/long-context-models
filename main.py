@@ -38,5 +38,13 @@ trainer, train_result, eval_metrics = train(model, tokenizer,
                                              num_train_epochs=1,
                                              per_device_train_batch_size=16)
 
+@torch.no_grad
+def score(text):
+    model_input = tokenizer(text, return_tensors="pt").to(model.device)
+    model_output = model(**model_input)
+    output = {'pred_score':int(model_output.logits.argmax(-1))}
+    output.update({f"pred_logit_{i}":float(model_output.logits[0][i]) for i in range(6)})
+    return output
+
 import pdb
 pdb.set_trace()
