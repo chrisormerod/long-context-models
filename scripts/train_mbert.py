@@ -14,7 +14,7 @@ from modeling.train_model import train
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
 import torch
 
-model_id = "awserdotai/ModernBERT-base"
+model_id = "anwserdotai/ModernBERT-base"
 
 data = get_asap(DATA_DIR)
 model = AutoModelForSequenceClassification.from_pretrained(model_id, num_labels=7)
