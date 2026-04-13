@@ -14,7 +14,7 @@ from modeling.train_model import train
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
 import torch
 
-model_id = "microsoft/deberta-v3-base"
+model_id = "FacebookAI/roberta-base"
 
 data = get_asap(DATA_DIR)
 model = AutoModelForSequenceClassification.from_pretrained(model_id, num_labels=7)
