@@ -27,7 +27,8 @@ trainer, train_result, eval_metrics = train(model, tokenizer,
                                              warmup_ratio = 0.0,
                                              num_train_epochs=4,
                                              max_length=512,
-                                             per_device_train_batch_size=8)
+                                             per_device_train_batch_size=8,
+                                             fp16=False)
 
 @torch.no_grad
 def score(text):
