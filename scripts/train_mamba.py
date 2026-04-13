@@ -38,5 +38,4 @@ def score(text):
 
 data['test'] = data['test'].map(lambda x:score(x['full_text']))
 
-import pdb
-pdb.set_trace()
+data['test'].to_csv("mamba.csv")

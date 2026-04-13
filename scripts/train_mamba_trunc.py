@@ -9,15 +9,14 @@ Created on Thu Apr  2 15:02:47 2026
 from data.asap_data import get_asap
 from config import DATA_DIR, TMP_DIR
 from modeling.train_model import train
-# from modeling.mamba_modeling import MambaForSequenceClassification
-
-from transformers import AutoTokenizer, AutoModelForSequenceClassification
+from modeling.mamba_modeling import MambaForSequenceClassification
+from transformers import AutoTokenizer
 import torch
 
-model_id = "answerdotai/ModernBERT-base"
+model_id = "state-spaces/mamba-130m-hf"
 
 data = get_asap(DATA_DIR)
-model = AutoModelForSequenceClassification.from_pretrained(model_id, num_labels=7)
+model = MambaForSequenceClassification.from_pretrained(model_id, num_labels=7)
 tokenizer = AutoTokenizer.from_pretrained(model_id)
 
 trainer, train_result, eval_metrics = train(model, tokenizer, 
@@ -26,7 +25,7 @@ trainer, train_result, eval_metrics = train(model, tokenizer,
                                              output_dir = TMP_DIR,
                                              warmup_ratio = 0.0,
                                              num_train_epochs=4,
-                                             max_length=8196,
+                                             max_length=512,
                                              per_device_train_batch_size=8)
 
 @torch.no_grad
@@ -39,4 +38,4 @@ def score(text):
 
 data['test'] = data['test'].map(lambda x:score(x['full_text']))
 
-data['test'].to_csv("mbert.csv")
+data['test'].to_csv("mamba_trunc.csv")

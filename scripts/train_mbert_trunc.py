@@ -14,7 +14,7 @@ from modeling.train_model import train
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
 import torch
 
-model_id = "FacebookAI/roberta-base"
+model_id = "answerdotai/ModernBERT-base"
 
 data = get_asap(DATA_DIR)
 model = AutoModelForSequenceClassification.from_pretrained(model_id, num_labels=7)
@@ -27,12 +27,11 @@ trainer, train_result, eval_metrics = train(model, tokenizer,
                                              warmup_ratio = 0.0,
                                              num_train_epochs=4,
                                              max_length=512,
-                                             per_device_train_batch_size=8,
-                                             fp16=False)
+                                             per_device_train_batch_size=8)
 
 @torch.no_grad
 def score(text):
-    model_input = tokenizer(text, return_tensors="pt",max_length=512).to(model.device)
+    model_input = tokenizer(text, return_tensors="pt").to(model.device)
     model_output = model(**model_input)
     output = {'pred_score':int(model_output.logits.argmax(-1))}
     output.update({f"pred_logit_{i}":float(model_output.logits[0][i]) for i in range(6)})
@@ -40,5 +39,4 @@ def score(text):
 
 data['test'] = data['test'].map(lambda x:score(x['full_text']))
 
-import pdb
-pdb.set_trace()
+data['test'].to_csv("mbert_trunc.csv")
