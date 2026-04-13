@@ -24,11 +24,11 @@ tokenizer = AutoTokenizer.from_pretrained(model_id)
 #     L.mixer.A_log.requires_grad_(False)
 #     L.mixer.D.requires_grad_(False)
     
-for x in model.backbone.layers: x.requires_grad_(False)
-for x in model.backbone.layers: x.mixer.x_proj.requires_grad_(True)
-for x in model.backbone.layers: x.mixer.dt_proj.requires_grad_(True)
-for x in model.backbone.layers: x.mixer.in_proj.requires_grad_(True)
-for x in model.backbone.layers: x.mixer.out_proj.requires_grad_(True)
+# for x in model.backbone.layers: x.requires_grad_(False)
+# for x in model.backbone.layers: x.mixer.x_proj.requires_grad_(True)
+# for x in model.backbone.layers: x.mixer.dt_proj.requires_grad_(True)
+# for x in model.backbone.layers: x.mixer.in_proj.requires_grad_(True)
+# for x in model.backbone.layers: x.mixer.out_proj.requires_grad_(True)
 
 trainer, train_result, eval_metrics = train(model, tokenizer, 
                                              data['train'].rename_columns({"full_text":"text","score":"label"}), 
