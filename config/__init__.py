@@ -11,3 +11,5 @@ else:
     DATA_DIR = "/home/ubuntu/data"
     MODEL_DIR = "/home/ubuntu/models"
     TMP_DIR = "/home/ubuntu/tmp"
+    
+EPOCHS = 10

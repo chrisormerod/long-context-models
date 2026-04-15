@@ -6,7 +6,7 @@ import torch
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
 
 from data.asap_data import get_asap
-from config import DATA_DIR, TMP_DIR
+from config import DATA_DIR, TMP_DIR, EPOCHS
 from modeling.train_model import train
 
 
@@ -66,7 +66,7 @@ def main(run_id: int, output_csv: str):
         data["test"].rename_columns({"full_text": "text", "score": "label"}),
         output_dir=os.path.join(TMP_DIR, f"run_{run_id}"),
         warmup_ratio=0.0,
-        num_train_epochs=4,
+        num_train_epochs=EPOCHS,
         max_length=512,
         per_device_train_batch_size=8,
     )
