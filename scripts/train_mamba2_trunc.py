@@ -24,6 +24,7 @@ trainer, train_result, eval_metrics = train(model, tokenizer,
                                              data['test'].rename_columns({"full_text":"text","score":"label"}), 
                                              output_dir = TMP_DIR,
                                              warmup_ratio = 0.0,
+                                             learning_rate = 1e-4,
                                              num_train_epochs=4,
                                              max_length=512,
                                              per_device_train_batch_size=8)
