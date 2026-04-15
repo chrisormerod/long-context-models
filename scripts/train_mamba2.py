@@ -38,4 +38,4 @@ def score(text):
 
 data['test'] = data['test'].map(lambda x:score(x['full_text']))
 
-data['test'].to_csv("mamba2.csv")
+data['test'].to_csv("outputs/mamba2.csv")
