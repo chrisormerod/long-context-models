@@ -13,7 +13,7 @@ from modeling.mamba_modeling import MambaForSequenceClassification
 from transformers import AutoTokenizer
 import torch
 
-model_id = "state-spaces/mamba-130m-hf"
+model_id = "AntonV/mamba2-130m-hf"
 
 data = get_asap(DATA_DIR)
 model = MambaForSequenceClassification.from_pretrained(model_id, num_labels=7)
@@ -38,4 +38,4 @@ def score(text):
 
 data['test'] = data['test'].map(lambda x:score(x['full_text']))
 
-data['test'].to_csv("mamba_trunc.csv")
+data['test'].to_csv("outputs/mamba_trunc.csv")
