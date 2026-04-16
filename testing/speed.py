@@ -163,7 +163,7 @@ def benchmark_models(
     mamba2_model, mamba2_tokenizer = load_mamba_and_tokenizer(mamba2_model_id, device)
 
     lengths = list(range(min_len, max_len + 1, step))
-    results = {"modern": [], "mamba": []}
+    results = {"modern": [], "mamba": [], "mamba2":[]}
 
     for L in tqdm(lengths, desc="Lengths"):
         text = make_text_for_tokens(L)
