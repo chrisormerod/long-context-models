@@ -250,6 +250,7 @@ if __name__ == "__main__":
     results = benchmark_models(
         modern_model_id=args.modern_model,
         mamba_model_id=args.mamba_model,
+        mamba2_model_id=args.mamba2_model,
         min_len=args.min_len,
         max_len=args.max_len,
         step=args.step,
