@@ -139,6 +139,7 @@ def single_forward_time_ms(
 def benchmark_models(
     modern_model_id: str,
     mamba_model_id: str,
+    mamba2_model_id: str,
     min_len: int = 64,
     max_len: int = 8192,
     step: int = 64,
@@ -157,6 +158,9 @@ def benchmark_models(
 
     print("Loading Mamba model/tokenizer...")
     mamba_model, mamba_tokenizer = load_mamba_and_tokenizer(mamba_model_id, device)
+    
+    print("Loading Mamba model/tokenizer...")
+    mamba2_model, mamba2_tokenizer = load_mamba_and_tokenizer(mamba2_model_id, device)
 
     lengths = list(range(min_len, max_len + 1, step))
     results = {"modern": [], "mamba": []}
@@ -186,11 +190,23 @@ def benchmark_models(
             repeats=repeats,
         )
 
+        # mamba
+        t_mamba2 = single_forward_time_ms(
+            model=mamba2_model,
+            tokenizer=mamba2_tokenizer,
+            text=text,
+            target_len=L,
+            device=device,
+            warmup=2,
+            repeats=repeats,
+        )
+
         results["modern"].append((L, t_modern))
         results["mamba"].append((L, t_mamba))
+        results["mamba2"].append((L, t_mamba2))
 
         # Optional: print progress
-        print(f" L={L:5d} tokens -> modern {t_modern:.2f} ms, mamba {t_mamba:.2f} ms")
+        print(f" L={L:5d} tokens -> modern {t_modern:.2f} ms, mamba {t_mamba:.2f} ms, mamba2 {t_mamba2:.2f} ms")
 
     return results
 
@@ -204,9 +220,9 @@ def save_results_csv(results: Dict[str, List[Tuple[int, float]]], out_path: str 
     lengths = [l for l, _ in results["modern"]]
     with open(out_path, "w", newline="") as f:
         writer = csv.writer(f)
-        writer.writerow(["length", "modern_ms", "mamba_ms"])
+        writer.writerow(["length", "modern_ms", "mamba_ms", "mamba2_ms"])
         for i, L in enumerate(lengths):
-            writer.writerow([L, results["modern"][i][1], results["mamba"][i][1]])
+            writer.writerow([L, results["modern"][i][1], results["mamba"][i][1], results["mamba2"][i][1]])
     print(f"Saved results to {out_path}")
 
 
@@ -214,6 +230,7 @@ def parse_args():
     p = argparse.ArgumentParser(description="Benchmark ModernBERT vs Mamba sequence classification inference speed")
     p.add_argument("--modern_model", type=str, default="answerdotai/ModernBERT-base", help="HF id of ModernBERT seq-class model (or substitute).")
     p.add_argument("--mamba_model", type=str, default="state-spaces/mamba-130m-hf", help="HF id/path for Mamba seq-class model.")
+    p.add_argument("--mamba2_model", type=str, default="AntonV/mamba2-130m-hf", help="HF id/path for Mamba seq-class model.")
     p.add_argument("--min_len", type=int, default=64)
     p.add_argument("--max_len", type=int, default=8192)
     p.add_argument("--step", type=int, default=64)

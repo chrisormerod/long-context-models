@@ -188,6 +188,10 @@ races = list(set(mbert['race_ethnicity']))
 race_bias = []
 
 for r in races:
-    row = {'race':r}
-    row.update(matched_pred_kl_test(mbert, mbert[mbert['race_ethnicity']=="White"], pred_col="pred_score"))
-    race_bias.append(row)
+    try:
+        row = {'race':r}
+        row.update(matched_pred_kl_test(mbert, mbert[mbert['race_ethnicity']==r], pred_col="pred_score"))
+        row['SMD'] = standardized_mean_difference(mbert[mbert['race_ethnicity']==r]['score'], mbert[mbert['race_ethnicity']==r]['pred_score'])
+        race_bias.append(row)
+    except:
+        pass
