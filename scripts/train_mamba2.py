@@ -83,7 +83,7 @@ def main(run_id: int, output_csv: str):
     trained_model = trainer.model
     trained_model.eval()
 
-    scored_test = score_dataset(data["test"], trained_model, tokenizer, max_length=512)
+    scored_test = score_dataset(data["test"], trained_model, tokenizer, max_length=MAX_LENGTH)
     scored_test.to_csv(output_csv, index=False)
 
     # Explicit cleanup before process exit
