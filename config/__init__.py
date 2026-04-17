@@ -12,4 +12,4 @@ else:
     MODEL_DIR = "/home/ubuntu/models"
     TMP_DIR = "/home/ubuntu/tmp"
     
-EPOCHS = 10
+EPOCHS = 5
