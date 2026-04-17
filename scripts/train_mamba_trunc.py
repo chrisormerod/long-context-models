@@ -19,10 +19,10 @@ from modeling.train_model import train
 
 
 MODEL_ID = "state-spaces/mamba-130m-hf"
-
+MAX_LENGTH = 512
 
 @torch.no_grad()
-def score_dataset(dataset, model, tokenizer, max_length=512):
+def score_dataset(dataset, model, tokenizer, max_length=MAX_LENGTH):
     device = model.device
 
     def score(example):
@@ -75,7 +75,7 @@ def main(run_id: int, output_csv: str):
         output_dir=os.path.join(TMP_DIR, f"run_{run_id}"),
         warmup_ratio=0.0,
         num_train_epochs=EPOCHS,
-        max_length=512,
+        max_length=MAX_LENGTH,
         per_device_train_batch_size=8,
     )
 
