@@ -17,7 +17,7 @@ from data.asap_data import get_asap
 from config import DATA_DIR, TMP_DIR, EPOCHS
 from modeling.train_model import train
 
-
+# MODEL_ID = "benchang1110/mamba2-130m-hf"
 MODEL_ID = "AntonV/mamba2-130m-hf"
 MAX_LENGTH = 8196
 
@@ -61,7 +61,7 @@ def cleanup():
 def main(run_id: int, output_csv: str):
     data = get_asap(DATA_DIR)
 
-    model = MambaForSequenceClassification.from_pretrained(
+    model2 = MambaForSequenceClassification.from_pretrained(
         MODEL_ID,
         num_labels=7,
     )
