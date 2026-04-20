@@ -116,7 +116,7 @@ exa_df = pd.DataFrame(rows_exa)
 
 races = scores['race_ethnicity'].unique()
 bias_rows = []
-kl_rows
+kl_rows = []
 
 
 idx = {r: scores['race_ethnicity']==r for r in races}
