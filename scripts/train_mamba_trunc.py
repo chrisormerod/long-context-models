@@ -19,10 +19,9 @@ from modeling.train_model import train
 
 
 MODEL_ID = "state-spaces/mamba-130m-hf"
-MAX_LENGTH = 512
 
 @torch.no_grad()
-def score_dataset(dataset, model, tokenizer, max_length=MAX_LENGTH):
+def score_dataset(dataset, model, tokenizer, max_length):
     device = model.device
 
     def score(example):
@@ -58,7 +57,7 @@ def cleanup():
             pass
 
 
-def main(run_id: int, output_csv: str):
+def main(run_id: int, output_csv: str, max_length : int):
     data = get_asap(DATA_DIR)
 
     model = MambaForSequenceClassification.from_pretrained(
@@ -75,7 +74,7 @@ def main(run_id: int, output_csv: str):
         output_dir=os.path.join(TMP_DIR, f"run_{run_id}"),
         warmup_ratio=0.0,
         num_train_epochs=EPOCHS,
-        max_length=MAX_LENGTH,
+        max_length=max_length,
         per_device_train_batch_size=8,
     )
 
@@ -83,7 +82,7 @@ def main(run_id: int, output_csv: str):
     trained_model = trainer.model
     trained_model.eval()
 
-    scored_test = score_dataset(data["test"], trained_model, tokenizer, max_length=MAX_LENGTH)
+    scored_test = score_dataset(data["test"], trained_model, tokenizer, max_length=max_length)
     scored_test.to_csv(output_csv, index=False)
 
     # Explicit cleanup before process exit
@@ -102,6 +101,8 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--run-id", type=int, required=True)
     parser.add_argument("--output-csv", type=str, required=True)
+    parser.add_argument("--max-length", type=int, required=True)
+    
     args = parser.parse_args()
 
-    main(args.run_id, args.output_csv)
+    main(args.run_id, args.output_csv, args.max_length)
