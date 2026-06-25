@@ -3,8 +3,8 @@ import subprocess
 import sys
 import time
 
-sequence = [{"script":"train_mbert_trunc","csv":"outputs/mbert_trunc"},
-            {"script":"train_mamba_trunc","csv":"outputs/mamba_trunc"}]
+sequence = [{"script":"train_mamba_trunc","csv":"outputs/mamba_trunc"},
+            {"script":"train_mbert_trunc","csv":"outputs/mbert_trunc"}]
 
 
 def main():
