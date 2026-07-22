@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Benchmark script: compare inference speed of two sequence-classification models
+Benchmark script: compare inference speed of sequence-classification models
 for input lengths from MIN_LEN..MAX_LEN (step STEP), averaging REPEATS runs.
 
 Usage:
@@ -36,12 +36,20 @@ from modeling.mamba_modeling import MambaForSequenceClassification
 
 def load_mamba_and_tokenizer(model_id: str, device: torch.device) -> Tuple[PreTrainedModel, PreTrainedTokenizerFast]:
     """
-    Load a sequence-classification model and its tokenizer.
+    Load a Mamba sequence-classification model and its tokenizer.
 
-    If the HF repo contains custom code (and requires trust_remote_code), you can
-    add `trust_remote_code=True` to from_pretrained calls below.
+    Args:
+        model_id: Hugging Face model identifier or local path.
+        device: PyTorch device (cpu or cuda).
+
+    Returns:
+        Tuple of (model, tokenizer) both loaded and ready for inference.
+
+    Notes:
+        If the HF repo contains custom code (and requires trust_remote_code), you can
+        add `trust_remote_code=True` to from_pretrained calls below.
     """
-    # Use AutoTokenizer (fast) and AutoModelForSequenceClassification
+    # Use AutoTokenizer (fast) and MambaForSequenceClassification
     tokenizer = AutoTokenizer.from_pretrained(model_id, use_fast=True)
     model = MambaForSequenceClassification.from_pretrained(model_id)
     model.to(device)
@@ -50,10 +58,18 @@ def load_mamba_and_tokenizer(model_id: str, device: torch.device) -> Tuple[PreTr
 
 def load_model_and_tokenizer(model_id: str, device: torch.device) -> Tuple[PreTrainedModel, PreTrainedTokenizerFast]:
     """
-    Load a sequence-classification model and its tokenizer.
+    Load a standard sequence-classification model and its tokenizer.
 
-    If the HF repo contains custom code (and requires trust_remote_code), you can
-    add `trust_remote_code=True` to from_pretrained calls below.
+    Args:
+        model_id: Hugging Face model identifier or local path.
+        device: PyTorch device (cpu or cuda).
+
+    Returns:
+        Tuple of (model, tokenizer) both loaded and ready for inference.
+
+    Notes:
+        If the HF repo contains custom code (and requires trust_remote_code), you can
+        add `trust_remote_code=True` to from_pretrained calls below.
     """
     # Use AutoTokenizer (fast) and AutoModelForSequenceClassification
     tokenizer = AutoTokenizer.from_pretrained(model_id, use_fast=True)
@@ -65,8 +81,16 @@ def load_model_and_tokenizer(model_id: str, device: torch.device) -> Tuple[PreTr
 
 def make_text_for_tokens(n_tokens: int) -> str:
     """
-    Produce a simple string that tokenizes to >= n_tokens tokens for typical tokenizers.
-    We use repeated short words which tokenizers will split into roughly one token each.
+    Produce a simple string that tokenizes to approximately n_tokens tokens.
+    
+    Uses repeated short words which tokenizers typically split into roughly one token each.
+    Adds a buffer to ensure sufficient tokens even with overhead from special tokens.
+
+    Args:
+        n_tokens: Target number of tokens.
+
+    Returns:
+        str: A simple repetitive text string.
     """
     # Use a short repetitive phrase. Multiply a bit to be safe.
     return ("word " * ((n_tokens // 1) + 50)).strip()
@@ -84,13 +108,17 @@ def single_forward_time_ms(
     """
     Measure average forward pass latency (ms) for a single example padded/truncated to target_len tokens.
 
-    - model: in eval() mode already and on device
-    - tokenizer: fast tokenizer
-    - text: source string (we'll force max_length=target_len)
-    - target_len: number of tokens to produce
-    - device: cpu/cuda device
-    - warmup: number of warm-up forwards to run
-    - repeats: number of timed forwards to run (averaged)
+    Args:
+        model: Model in eval() mode already and on device.
+        tokenizer: Fast tokenizer for encoding.
+        text: Source string (will be force padded/truncated to max_length=target_len).
+        target_len: Number of tokens to produce after tokenization.
+        device: cpu/cuda device.
+        warmup: Number of warm-up forwards to run (not timed).
+        repeats: Number of timed forwards to run (results averaged).
+
+    Returns:
+        float: Average forward pass latency in milliseconds.
     """
     # Tokenize to exact length target_len using truncation/padding
     enc = tokenizer(
@@ -107,9 +135,9 @@ def single_forward_time_ms(
     # Some models require token_type_ids
     # token_type_ids = enc["token_type_ids"].to(device) if "token_type_ids" in enc else None
     token_type_ids = None
-    # warmup
+    
+    # Warmup runs: allow GPU/cache to stabilize
     with torch.inference_mode():
-        
         for _ in range(warmup):
             if token_type_ids is not None:
                 _ = model(input_ids=input_ids)
@@ -119,7 +147,7 @@ def single_forward_time_ms(
             if device.type == "cuda":
                 torch.cuda.synchronize()
 
-    # timed runs
+    # Timed runs: measure actual latency
     times = []
     with torch.inference_mode():
         for _ in range(repeats):
@@ -147,8 +175,24 @@ def benchmark_models(
     device_str: str = "cuda",
 ) -> Dict[str, List[Tuple[int, float]]]:
     """
-    Run full benchmark for both models. Returns dict:
-      { 'modern': [(L, avg_ms), ...], 'mamba': [(L, avg_ms), ...] }
+    Run full benchmark for all three models across a range of sequence lengths.
+    
+    Benchmarks three models (ModernBERT, Mamba, Mamba2) over a range of input lengths,
+    measuring inference latency for each.
+
+    Args:
+        modern_model_id: Hugging Face ID for ModernBERT model.
+        mamba_model_id: Hugging Face ID for Mamba model.
+        mamba2_model_id: Hugging Face ID for Mamba2 model.
+        min_len: Minimum sequence length to benchmark.
+        max_len: Maximum sequence length to benchmark.
+        step: Step size between sequence lengths.
+        repeats: Number of forward passes per sequence length (results averaged).
+        device_str: Device string ("cuda" or "cpu").
+
+    Returns:
+        dict: Results keyed by model name ("modern", "mamba", "mamba2").
+              Each maps to a list of (sequence_length, latency_ms) tuples.
     """
     device = torch.device(device_str if torch.cuda.is_available() and device_str == "cuda" else "cpu")
     print(f"Using device: {device}")
@@ -159,7 +203,7 @@ def benchmark_models(
     print("Loading Mamba model/tokenizer...")
     mamba_model, mamba_tokenizer = load_mamba_and_tokenizer(mamba_model_id, device)
     
-    print("Loading Mamba model/tokenizer...")
+    print("Loading Mamba2 model/tokenizer...")
     mamba2_model, mamba2_tokenizer = load_mamba_and_tokenizer(mamba2_model_id, device)
 
     lengths = list(range(min_len, max_len + 1, step))
@@ -168,7 +212,7 @@ def benchmark_models(
     for L in tqdm(lengths, desc="Lengths"):
         text = make_text_for_tokens(L)
 
-        # modern
+        # Modern model
         t_modern = single_forward_time_ms(
             model=modern_model,
             tokenizer=modern_tokenizer,
@@ -179,7 +223,7 @@ def benchmark_models(
             repeats=repeats,
         )
 
-        # mamba
+        # Mamba model
         t_mamba = single_forward_time_ms(
             model=mamba_model,
             tokenizer=mamba_tokenizer,
@@ -190,7 +234,7 @@ def benchmark_models(
             repeats=repeats,
         )
 
-        # mamba
+        # Mamba2 model
         t_mamba2 = single_forward_time_ms(
             model=mamba2_model,
             tokenizer=mamba2_tokenizer,
@@ -205,7 +249,7 @@ def benchmark_models(
         results["mamba"].append((L, t_mamba))
         results["mamba2"].append((L, t_mamba2))
 
-        # Optional: print progress
+        # Print progress
         print(f" L={L:5d} tokens -> modern {t_modern:.2f} ms, mamba {t_mamba:.2f} ms, mamba2 {t_mamba2:.2f} ms")
 
     return results
@@ -213,7 +257,13 @@ def benchmark_models(
 
 def save_results_csv(results: Dict[str, List[Tuple[int, float]]], out_path: str = "bench_results.csv"):
     """
-    Save results in CSV format with columns: length, modern_ms, mamba_ms
+    Save benchmark results to a CSV file.
+    
+    Writes results in tabular format with columns for sequence length and latency per model.
+
+    Args:
+        results: Dict mapping model names to lists of (length, latency_ms) tuples.
+        out_path: Output CSV file path.
     """
     import csv
 
@@ -227,10 +277,25 @@ def save_results_csv(results: Dict[str, List[Tuple[int, float]]], out_path: str 
 
 
 def parse_args():
-    p = argparse.ArgumentParser(description="Benchmark ModernBERT vs Mamba sequence classification inference speed")
+    """
+    Parse and return command-line arguments.
+    
+    Returns:
+        Namespace: Parsed arguments with the following attributes:
+            - modern_model: HF model ID for ModernBERT
+            - mamba_model: HF model ID for Mamba
+            - mamba2_model: HF model ID for Mamba2
+            - min_len: Minimum sequence length
+            - max_len: Maximum sequence length
+            - step: Step size between lengths
+            - repeats: Number of forward passes per length
+            - device: Device to use ("cuda" or "cpu")
+            - out: Output CSV file path
+    """
+    p = argparse.ArgumentParser(description="Benchmark ModernBERT vs Mamba vs Mamba2 sequence classification inference speed")
     p.add_argument("--modern_model", type=str, default="answerdotai/ModernBERT-base", help="HF id of ModernBERT seq-class model (or substitute).")
     p.add_argument("--mamba_model", type=str, default="state-spaces/mamba-130m-hf", help="HF id/path for Mamba seq-class model.")
-    p.add_argument("--mamba2_model", type=str, default="AntonV/mamba2-130m-hf", help="HF id/path for Mamba seq-class model.")
+    p.add_argument("--mamba2_model", type=str, default="AntonV/mamba2-130m-hf", help="HF id/path for Mamba2 seq-class model.")
     p.add_argument("--min_len", type=int, default=64)
     p.add_argument("--max_len", type=int, default=8192)
     p.add_argument("--step", type=int, default=64)

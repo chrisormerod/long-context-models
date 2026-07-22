@@ -16,6 +16,27 @@ from sklearn.metrics import cohen_kappa_score
 
 
 def compute_metrics(eval_pred):
+    """
+    Compute classification metrics from model predictions and labels.
+    
+    Metrics computed:
+        - Accuracy: exact match rate
+        - QWK (Quadratic Weighted Kappa): inter-rater agreement metric suitable for ordinal scales
+        - For binary classification, also computes: precision, recall, and F1 score
+    
+    Args:
+        eval_pred: Named tuple or dict containing:
+            - predictions (or logits): Model output logits of shape (batch_size, num_labels)
+            - label_ids (or labels): Ground truth labels of shape (batch_size,)
+    
+    Returns:
+        dict: Dictionary containing computed metrics:
+            - "accuracy": float between 0 and 1
+            - "QWK": float, quadratic weighted kappa score
+            - "precision": float (binary only), TP / (TP + FP)
+            - "recall": float (binary only), TP / (TP + FN)
+            - "f1": float (binary only), harmonic mean of precision and recall
+    """
     logits, labels = eval_pred
     preds = np.argmax(logits, axis=-1)
     
@@ -152,6 +173,7 @@ def train(
             tokenizer.add_special_tokens({"pad_token": "[PAD]"})
 
     def preprocess_function(examples):
+        """Tokenize and prepare examples for training."""
         tokenized = tokenizer(
             examples[text_column],
             truncation=True,

@@ -10,6 +10,25 @@ sequence = [
 
 
 def main():
+    """
+    Execute a sequence of model training runs with varying maximum sequence lengths.
+    
+    This script orchestrates the training of multiple models (Mamba and ModernBERT)
+    across a range of maximum sequence lengths and multiple runs per configuration.
+    It checks for existing output files to avoid redundant computation.
+    
+    Configuration:
+        - Models: Mamba truncated and ModernBERT truncated variants
+        - Max lengths: 64 to 2048 tokens (in steps of 64)
+        - Runs per configuration: 10
+    
+    Output:
+        - CSV files with predictions saved to specified output directories
+        - Execution time and status logged to stdout
+    
+    Raises:
+        RuntimeError: If any subprocess exits with a non-zero return code
+    """
     for config in sequence:
         
         script = "scripts."+config['script']
